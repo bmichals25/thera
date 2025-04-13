@@ -59,7 +59,27 @@ document.addEventListener('DOMContentLoaded', function() {
             summaryService.addMessage(senderType, text);
         };
         
-        console.log("Connected to voice chat app for message tracking");
+        // Hook into the disconnect method to automatically generate a summary on end call
+        const originalDisconnect = voiceChatApp.disconnect;
+        
+        voiceChatApp.disconnect = async function() {
+            // Call the original method first
+            originalDisconnect.call(voiceChatApp);
+            
+            // Then generate and show the summary automatically
+            console.log("Call ended, generating automatic summary");
+            try {
+                const summary = await summaryService.handleEndOfCall();
+                if (summary) {
+                    summaryUI._displaySummary(summary);
+                    summaryUI.showModal();
+                }
+            } catch (error) {
+                console.error("Error generating automatic end-of-call summary:", error);
+            }
+        };
+        
+        console.log("Connected to voice chat app for message tracking and end-of-call summary");
     }
     
     // Add a button to the conversation UI to manually trigger summary generation

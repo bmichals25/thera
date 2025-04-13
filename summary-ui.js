@@ -198,20 +198,35 @@ class SummaryUI {
                     margin-bottom: 10px;
                 }
                 
+                .summary-raw-content {
+                    background-color: #f5f5f5;
+                    padding: 15px;
+                    border-radius: 5px;
+                    border-left: 3px solid #7E57C2;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin-top: 10px;
+                    white-space: pre-wrap;
+                }
+                
                 .summary-list {
-                    list-style-type: disc;
                     padding-left: 20px;
-                    margin: 10px 0;
+                    margin-top: 5px;
                 }
                 
                 .summary-item {
                     margin-bottom: 5px;
-                    line-height: 1.5;
+                }
+                
+                .summary-timestamp {
+                    color: #666;
+                    font-size: 14px;
+                    margin-top: 5px;
                 }
                 
                 .webhook-status {
                     text-align: center;
-                    margin-top: 15px;
+                    margin-top: 20px;
                     font-size: 12px;
                     color: #666;
                 }
@@ -226,6 +241,10 @@ class SummaryUI {
                 
                 .status-error {
                     color: #F44336;
+                }
+                
+                .status-processing {
+                    color: #2196F3;
                 }
             `;
             
@@ -379,6 +398,14 @@ class SummaryUI {
                 html += '</ul>';
             }
             
+            html += '</div>';
+        }
+        
+        // If we have raw summary content from ElevenLabs, display it
+        if (summary.summary_content || summary.raw_summary) {
+            html += '<div class="summary-section">';
+            html += '<h3 class="summary-section-title">Session Summary</h3>';
+            html += `<div class="summary-raw-content">${summary.summary_content || summary.raw_summary}</div>`;
             html += '</div>';
         }
         

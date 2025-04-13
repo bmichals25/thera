@@ -46,6 +46,15 @@ class WebhookHandler {
                 throw new Error("Invalid webhook request format");
             }
             
+            // Check if request contains summary data from ElevenLabs
+            if (request.summary_data) {
+                console.log("Request contains summary data from ElevenLabs");
+                // Store the summary data in the summary service
+                if (this.summaryService) {
+                    this.summaryService.setIncomingSummaryData(request.summary_data);
+                }
+            }
+            
             // Trigger the onSummaryRequest callback if provided
             if (this.callbacks.onSummaryRequest) {
                 this.callbacks.onSummaryRequest(request);

@@ -20,6 +20,7 @@ class SummaryService {
                 new_goals: []
             }
         };
+        this.incomingSummaryData = null; // Store incoming summary data from ElevenLabs
     }
 
     // Initialize the service with API credentials
@@ -44,6 +45,12 @@ class SummaryService {
         this.conversationHistory = [];
     }
 
+    // Store incoming summary data from ElevenLabs
+    setIncomingSummaryData(summaryData) {
+        this.incomingSummaryData = summaryData;
+        console.log("Received summary data from ElevenLabs:", summaryData);
+    }
+
     // Generate a summary of the conversation
     async generateSummary() {
         if (this.conversationHistory.length === 0) {
@@ -52,6 +59,22 @@ class SummaryService {
         }
 
         try {
+            // If we have incoming summary data from ElevenLabs, use that instead of generating our own
+            if (this.incomingSummaryData) {
+                console.log("Using incoming summary data from ElevenLabs");
+                return {
+                    ...this.summaryTemplate,
+                    ...this.incomingSummaryData,
+                    conversation_statistics: {
+                        total_messages: this.conversationHistory.length,
+                        user_messages: this.conversationHistory.filter(msg => msg.sender === 'user').length,
+                        agent_messages: this.conversationHistory.filter(msg => msg.sender === 'agent').length,
+                        duration_minutes: this._calculateConversationDuration()
+                    },
+                    timestamp: new Date().toISOString()
+                };
+            }
+
             // Extract user messages and agent responses
             const userMessages = this.conversationHistory
                 .filter(msg => msg.sender === 'user')
@@ -110,33 +133,48 @@ class SummaryService {
     }
 
     // Send the summary to ElevenLabs via webhook
-    async _sendToElevenLabs(summary) {
+    async _sendToElevenLabs(data) {
         try {
+            // Determine if this is a summary request or sending summary data
+            const isSummaryRequest = data.summary_request === true;
+            
+            const requestBody = isSummaryRequest 
+                ? {
+                    summary_request: true,
+                    conversation_history: this.conversationHistory,
+                    metadata: {
+                        source: 'therapy_app',
+                        version: '1.0',
+                        timestamp: new Date().toISOString()
+                    }
+                }
+                : {
+                    summary_data: data,
+                    metadata: {
+                        source: 'therapy_app',
+                        version: '1.0',
+                        timestamp: new Date().toISOString()
+                    }
+                };
+                
             const response = await fetch(this.webhookEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'xi-api-key': this.apiKey
                 },
-                body: JSON.stringify({
-                    summary_data: summary,
-                    metadata: {
-                        source: 'therapy_app',
-                        version: '1.0',
-                        timestamp: new Date().toISOString()
-                    }
-                })
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
                 throw new Error(`ElevenLabs webhook failed with status: ${response.status}`);
             }
 
-            const data = await response.json();
-            console.log("Summary sent to ElevenLabs successfully:", data);
-            return data;
+            const responseData = await response.json();
+            console.log(`Summary ${isSummaryRequest ? 'request' : 'data'} sent to ElevenLabs successfully:`, responseData);
+            return responseData;
         } catch (error) {
-            console.error("Failed to send summary to ElevenLabs:", error);
+            console.error("Failed to send to ElevenLabs:", error);
             throw error;
         }
     }
@@ -287,6 +325,42 @@ class SummaryService {
         
         // Return duration in minutes
         return Math.round((endTime - startTime) / (1000 * 60));
+    }
+
+    // Method to handle end of call and trigger automatic summary generation
+    async handleEndOfCall() {
+        console.log("End of call detected, generating automatic summary");
+        
+        try {
+            // If ElevenLabs hasn't sent us a summary yet, we'll need to request one
+            if (!this.incomingSummaryData) {
+                console.log("No incoming summary data yet, requesting from ElevenLabs");
+                
+                // Prepare the request to ElevenLabs
+                const summaryRequest = {
+                    summary_request: true,
+                    conversation_history: this.conversationHistory,
+                    request_id: crypto.randomUUID(),
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Send the request
+                if (this.apiKey && this.webhookEndpoint) {
+                    try {
+                        await this._sendToElevenLabs(summaryRequest);
+                        console.log("Summary request sent to ElevenLabs");
+                    } catch (error) {
+                        console.error("Failed to request summary from ElevenLabs:", error);
+                    }
+                }
+            }
+            
+            // Generate summary immediately with whatever data we have
+            return await this.generateSummary();
+        } catch (error) {
+            console.error("Error handling end of call:", error);
+            return null;
+        }
     }
 }
 
