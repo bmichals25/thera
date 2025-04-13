@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thera - AI Therapy</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="elevenlabs_styles.css">
+</head>
+<body>
+    <audio id="backgroundMusic" src="Assets/Master Minded - Opening Up.wav" loop preload="auto"></audio>
+
+    <div class="app-container">
+        <!-- Initial Welcome/Start Screen -->
+        <div id="welcomeScreen" class="screen active">
+            <header class="app-header">
+                <div class="streak-indicator" id="streakIndicator">
+                    <span class="streak-count">7</span>
+                    <span class="streak-icon">🔥</span>
+                </div>
+                <h1>Thera</h1>
+                <p>Your compassionate AI companion for mental well-being</p>
+                <div class="profile-button">
+                    <div class="profile-pic">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="dropdown-header">
+                            <div class="dropdown-profile-pic">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="dropdown-user-info">
+                                <div class="dropdown-name">Ben</div>
+                                <div class="dropdown-email">ben@example.com</div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item" data-action="edit-profile">
+                                <i class="fas fa-user-edit"></i>
+                                <span>Edit Profile</span>
+                            </div>
+                            <div class="dropdown-item" data-action="settings">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </div>
+                            <div class="dropdown-item logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Streak Popup -->
+            <div id="streakPopup" class="streak-popup">
+                <div class="streak-popup-header">
+                    <h3>Your Streak</h3>
+                    <button id="closeStreakPopup" class="close-popup-button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="streak-popup-content">
+                    <div class="current-streak">
+                        <div class="streak-badge">
+                            <span class="large-streak-count">7</span>
+                            <span class="streak-icon">🔥</span>
+                        </div>
+                        <p>Keep it up! You're making great progress.</p>
+                    </div>
+                    
+                    <div class="streak-goal">
+                        <h4>Next Goal: <span>10 days</span></h4>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 70%;"></div>
+                        </div>
+                        <p>3 more days to reach your next milestone</p>
+                    </div>
+                    
+                    <div class="weekly-activity">
+                        <h4>Last 7 Days</h4>
+                        <div class="day-markers">
+                            <div class="day-marker">
+                                <div class="day-circle completed">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <span class="day-label">Mon</span>
+                            </div>
+                            <div class="day-marker">
+                                <div class="day-circle completed">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <span class="day-label">Tue</span>
+                            </div>
+                            <div class="day-marker">
+                                <div class="day-circle completed">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <span class="day-label">Wed</span>
+                            </div>
+                            <div class="day-marker">
+                                <div class="day-circle completed">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <span class="day-label">Thu</span>
+                            </div>
+                            <div class="day-marker">
+                                <div class="day-circle completed">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <span class="day-label">Fri</span>
+                            </div>
+                            <div class="day-marker">
+                                <div class="day-circle completed">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <span class="day-label">Sat</span>
+                            </div>
+                            <div class="day-marker">
+                                <div class="day-circle completed">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <span class="day-label">Sun</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <main class="welcome-content">
+                <div class="home-layout">
+                    <div class="home-buttons-container">
+                        <div class="home-buttons">
+                            <button id="startSessionBtn" class="home-button">
+                                <i class="fas fa-comments"></i>
+                                <span>Start Session</span>
+                            </button>
+                            <button id="logMoodBtn" class="home-button">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Log Mood</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mood-tracking-chart">
+                        <div class="chart-header">
+                            <h3>Track Your Daily Mood</h3>
+                            <div class="chart-nav">
+                                <button class="chart-nav-btn prev"><i class="fas fa-chevron-left"></i></button>
+                                <span class="chart-period">This week</span>
+                                <button class="chart-nav-btn next"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="chart-content">
+                            <div class="mood-levels">
+                                <div class="mood-level">😄</div>
+                                <div class="mood-level">🙂</div>
+                                <div class="mood-level">😐</div>
+                                <div class="mood-level">🙁</div>
+                                <div class="mood-level">😢</div>
+                            </div>
+                            <div class="chart-graph">
+                                <canvas id="moodChart"></canvas>
+                                <div class="day-labels">
+                                    <span>MON</span>
+                                    <span>TUE</span>
+                                    <span>WED</span>
+                                    <span>THU</span>
+                                    <span>FRI</span>
+                                    <span>SAT</span>
+                                    <span>SUN</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recent-sessions">
+                    <h2>Recent Sessions</h2>
+                    <div class="session-cards">
+                        <!-- Show only the two most recent sessions by default -->
+                        <div class="session-card">
+                            <div class="session-card-header">
+                                <span class="session-date">July 15, 2025</span>
+                                <span class="mood-indicator positive" title="Mood improved"></span>
+                            </div>
+                            <div class="session-card-body">
+                                <div class="session-duration">
+                                    <i class="fas fa-clock"></i> 20 minutes
+                                </div>
+                                <div class="session-tags">
+                                    <span class="tag">anxiety</span>
+                                    <span class="tag">work</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="session-card">
+                            <div class="session-card-header">
+                                <span class="session-date">July 12, 2025</span>
+                                <span class="mood-indicator neutral" title="Mood neutral"></span>
+                            </div>
+                            <div class="session-card-body">
+                                <div class="session-duration">
+                                    <i class="fas fa-clock"></i> 35 minutes
+                                </div>
+                                <div class="session-tags">
+                                    <span class="tag">relationships</span>
+                                    <span class="tag">family</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="viewAllSessionsBtn" class="view-all-button">
+                        <i class="fas fa-history"></i> View All Sessions
+                    </button>
+                    
+                    <!-- Hidden container for all sessions (will be shown when "View All" is clicked) -->
+                    <div id="allSessionsContainer" class="all-sessions-container">
+                        <div class="all-sessions-header">
+                            <h3>All Sessions</h3>
+                            <button id="closeAllSessionsBtn" class="close-panel-button">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="all-sessions-list">
+                            <!-- All session entries -->
+                            <div class="session-card">
+                                <div class="session-card-header">
+                                    <span class="session-date">July 15, 2025</span>
+                                    <span class="mood-indicator positive" title="Mood improved"></span>
+                                </div>
+                                <div class="session-card-body">
+                                    <div class="session-duration">
+                                        <i class="fas fa-clock"></i> 20 minutes
+                                    </div>
+                                    <div class="session-tags">
+                                        <span class="tag">anxiety</span>
+                                        <span class="tag">work</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="session-card">
+                                <div class="session-card-header">
+                                    <span class="session-date">July 12, 2025</span>
+                                    <span class="mood-indicator neutral" title="Mood neutral"></span>
+                                </div>
+                                <div class="session-card-body">
+                                    <div class="session-duration">
+                                        <i class="fas fa-clock"></i> 35 minutes
+                                    </div>
+                                    <div class="session-tags">
+                                        <span class="tag">relationships</span>
+                                        <span class="tag">family</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="session-card">
+                                <div class="session-card-header">
+                                    <span class="session-date">July 9, 2025</span>
+                                    <span class="mood-indicator positive" title="Mood improved"></span>
+                                </div>
+                                <div class="session-card-body">
+                                    <div class="session-duration">
+                                        <i class="fas fa-clock"></i> 42 minutes
+                                    </div>
+                                    <div class="session-tags">
+                                        <span class="tag">stress</span>
+                                        <span class="tag">sleep</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="session-card">
+                                <div class="session-card-header">
+                                    <span class="session-date">July 5, 2025</span>
+                                    <span class="mood-indicator negative" title="Mood worsened"></span>
+                                </div>
+                                <div class="session-card-body">
+                                    <div class="session-duration">
+                                        <i class="fas fa-clock"></i> 18 minutes
+                                    </div>
+                                    <div class="session-tags">
+                                        <span class="tag">grief</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer class="app-footer">
+                <p>&copy; 2025 Thera. All rights reserved.</p>
+            </footer>
+        </div>
+
+        <!-- All Sessions Screen (Hidden Initially) -->
+        <div id="allSessionsScreen" class="screen">
+            <header class="app-header">
+                <button id="backToHomeBtn" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>All Sessions</h1>
+            </header>
+            <main class="all-sessions-content">
+                <div class="all-sessions-grid">
+                    <!-- Session entries -->
+                    <div class="session-card">
+                        <div class="session-card-header">
+                            <span class="session-date">July 15, 2025</span>
+                            <span class="mood-indicator positive" title="Mood improved"></span>
+                        </div>
+                        <div class="session-card-body">
+                            <div class="session-duration">
+                                <i class="fas fa-clock"></i> 20 minutes
+                            </div>
+                            <div class="session-tags">
+                                <span class="tag">anxiety</span>
+                                <span class="tag">work</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="session-card">
+                        <div class="session-card-header">
+                            <span class="session-date">July 12, 2025</span>
+                            <span class="mood-indicator neutral" title="Mood neutral"></span>
+                        </div>
+                        <div class="session-card-body">
+                            <div class="session-duration">
+                                <i class="fas fa-clock"></i> 35 minutes
+                            </div>
+                            <div class="session-tags">
+                                <span class="tag">relationships</span>
+                                <span class="tag">family</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="session-card">
+                        <div class="session-card-header">
+                            <span class="session-date">July 9, 2025</span>
+                            <span class="mood-indicator positive" title="Mood improved"></span>
+                        </div>
+                        <div class="session-card-body">
+                            <div class="session-duration">
+                                <i class="fas fa-clock"></i> 42 minutes
+                            </div>
+                            <div class="session-tags">
+                                <span class="tag">stress</span>
+                                <span class="tag">sleep</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="session-card">
+                        <div class="session-card-header">
+                            <span class="session-date">July 5, 2025</span>
+                            <span class="mood-indicator negative" title="Mood worsened"></span>
+                        </div>
+                        <div class="session-card-body">
+                            <div class="session-duration">
+                                <i class="fas fa-clock"></i> 18 minutes
+                            </div>
+                            <div class="session-tags">
+                                <span class="tag">grief</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="session-card">
+                        <div class="session-card-header">
+                            <span class="session-date">July 1, 2025</span>
+                            <span class="mood-indicator positive" title="Mood improved"></span>
+                        </div>
+                        <div class="session-card-body">
+                            <div class="session-duration">
+                                <i class="fas fa-clock"></i> 25 minutes
+                            </div>
+                            <div class="session-tags">
+                                <span class="tag">career</span>
+                                <span class="tag">goals</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="session-card">
+                        <div class="session-card-header">
+                            <span class="session-date">June 28, 2025</span>
+                            <span class="mood-indicator neutral" title="Mood neutral"></span>
+                        </div>
+                        <div class="session-card-body">
+                            <div class="session-duration">
+                                <i class="fas fa-clock"></i> 15 minutes
+                            </div>
+                            <div class="session-tags">
+                                <span class="tag">health</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Session Recap Screen (Hidden Initially) -->
+        <div id="sessionRecapScreen" class="screen">
+            <header class="app-header">
+                <button id="backFromRecapBtn" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Session Recap</h1>
+                <button id="continueDiscussionBtn" class="continue-button">
+                    <i class="fas fa-comments"></i> Continue Discussion
+                </button>
+                <button id="doneRecapBtn" class="done-button">
+                    <i class="fas fa-check"></i> Done
+                </button>
+            </header>
+            <main class="recap-content">
+                <div class="recap-header">
+                    <div class="recap-date-time">
+                        <h2 id="recapDate">July 15, 2025</h2>
+                        <div class="recap-duration">
+                            <i class="fas fa-clock"></i> <span id="recapDuration">20 minutes</span>
+                        </div>
+                    </div>
+                    <div class="recap-mood">
+                        <div class="mood-change">
+                            <span class="mood-before">
+                                <i class="fas fa-arrow-right"></i> <span id="moodAfter">Improved</span>
+                            </span>
+                        </div>
+                        <div id="recapMoodIndicator" class="mood-indicator positive"></div>
+                    </div>
+                </div>
+                
+                <div class="recap-tags-container">
+                    <h3>Topics</h3>
+                    <div id="recapTags" class="recap-tags">
+                        <span class="tag">anxiety</span>
+                        <span class="tag">work</span>
+                    </div>
+                </div>
+                
+                <div class="recap-summary">
+                    <h3>Summary</h3>
+                    <p id="recapSummary">In this session, we explored how workplace anxiety affects your productivity and discussed strategies for managing stress during high-pressure deadlines. You identified that perfectionism contributes to your anxiety, and we worked on developing more realistic expectations and self-compassion techniques.</p>
+                </div>
+                
+                <div class="recap-insights">
+                    <h3>Key Insights</h3>
+                    <ul id="recapInsights">
+                        <li>Recognizing perfectionist tendencies as a source of anxiety</li>
+                        <li>The importance of setting boundaries at work</li>
+                        <li>How mindfulness can help reduce anticipatory anxiety</li>
+                    </ul>
+                </div>
+                
+                <div class="recap-actions">
+                    <h3>Action Items</h3>
+                    <ul id="recapActions">
+                        <li>Practice 5-minute mindfulness breaks twice daily</li>
+                        <li>Schedule "worry time" to contain anxious thoughts</li>
+                        <li>Use the RAIN technique when feeling overwhelmed</li>
+                    </ul>
+                </div>
+            </main>
+        </div>
+
+        <!-- Pre-Session Check-in Screen (Hidden Initially) -->
+        <div id="preSessionCheckinScreen" class="screen checkin-screen">
+            <header class="app-header checkin-header">
+                <h2>How are you feeling right now?</h2>
+            </header>
+            <main class="checkin-options">
+                <div class="mood-slider-container">
+                    <div id="preSessionMoodGraphic" class="mood-graphic"></div>
+                    <div class="slider-labels">
+                        <span>Stressed</span>
+                        <span>Sad</span>
+                        <span>Neutral</span>
+                        <span>Okay</span>
+                        <span>Happy</span>
+                    </div>
+                    <input type="range" id="preSessionMoodSlider" min="0" max="4" value="2" class="mood-slider">
+                    <div class="mood-label">
+                        <span id="preSessionMoodLabel">Neutral</span>
+                    </div>
+                </div>
+            </main>
+            <footer class="checkin-footer">
+                <button id="startSessionAfterCheckin" class="cta-button">Start Session</button>
+            </footer>
+        </div>
+
+        <!-- Main Session Screen (Hidden Initially) -->
+        <div id="sessionScreen" class="screen">
+            <div class="voice-visualizer-container">
+                <div class="caller-info">
+                    <div class="therapist-title">Therapist</div>
+                    <div id="sessionTimer" class="session-timer">00:00</div>
+                </div>
+                <div id="voiceVisualizer" class="voice-circle">
+                    <i class="fas fa-headphones-alt"></i>
+                </div>
+
+                <div id="subtitlesContainer" class="subtitles-container"></div>
+
+                <div id="userMicVisualizer" class="user-mic-freq-container">
+                    <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div>
+                    <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div>
+                    <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div>
+                    <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div>
+                    <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div>
+                    <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div>
+                    <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div>
+                    <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div> <div class="freq-bar"></div>
+                </div>
+                <div class="status-indicator-session">
+                    <span id="connection-status">Connecting...</span>
+                    <span id="recording-status">Mic Inactive</span>
+                </div>
+            </div>
+
+            <div class="session-controls">
+                 <button id="toggleChatButton" class="control-button" title="Open Chat">
+                    <i class="fas fa-comment-dots"></i>
+                </button>
+                <button id="musicToggleButton" class="control-button" title="Mute/Unmute Music">
+                   <span id="musicToggleIcon"><i class="fas fa-volume-up"></i></span>
+               </button>
+               <button id="ccToggleButton" class="control-button" title="Show/Hide Captions">
+                   <i class="fas fa-closed-captioning"></i>
+               </button>
+                <button id="levelsButton" class="control-button" title="Adjust Levels">
+                   <i class="fas fa-sliders-h"></i>
+               </button>
+                <button id="endSessionButton" class="control-button hangup-button" title="End Session">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+            </div>
+
+            <!-- Chat Interface (Hidden Initially) -->
+            <div id="chatInterface" class="chat-panel">
+                <div class="chat-header">
+                    <h3>Conversation</h3>
+                    <button id="closeChatButton" class="control-button close-chat" title="Close Chat">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="conversation-container" id="conversation">
+                    <div class="message ai-message">Hello, I'm here to listen. How are you feeling today?</div> 
+                </div>
+            </div>
+            
+            <!-- Internal button, never shown to user -->
+            <button id="connect-btn" style="display: none;">Internal Connect</button> 
+        </div>
+
+        <!-- Levels Popup (Hidden Initially) -->
+        <div id="levelsPopup" class="popup">
+            <div class="popup-header">
+                <h4>Audio Levels</h4>
+                <button id="closeLevelsPopup" class="popup-close-button">&times;</button>
+            </div>
+            <div class="popup-content">
+                <div class="slider-container">
+                    <label for="musicVolumeSlider"><i class="fas fa-music"></i> Music Volume</label>
+                    <input type="range" id="musicVolumeSlider" min="0" max="100" value="50">
+                </div>
+                <div class="slider-container">
+                    <label for="agentVolumeSlider"><i class="fas fa-robot"></i> Agent Volume</label>
+                    <input type="range" id="agentVolumeSlider" min="0" max="100" value="100">
+                </div>
+                <div class="slider-container">
+                    <label for="reverbSlider"><i class="fas fa-broadcast-tower"></i> Voice Reverb</label>
+                    <input type="range" id="reverbSlider" min="0" max="100" value="5">
+                </div>
+            </div>
+        </div>
+
+        <!-- Post-Session Check-in Screen (Hidden Initially) -->
+        <div id="postSessionCheckinScreen" class="screen checkin-screen">
+            <header class="app-header checkin-header">
+                <h2>How are you feeling after the session?</h2>
+            </header>
+            <main class="checkin-options">
+                <div class="mood-slider-container">
+                    <div id="postSessionMoodGraphic" class="mood-graphic"></div>
+                    <div class="slider-labels">
+                        <span>Worse</span>
+                        <span>Same</span>
+                        <span>Neutral</span>
+                        <span>Better</span>
+                        <span>Much Better</span>
+                    </div>
+                    <input type="range" id="postSessionMoodSlider" min="0" max="4" value="2" class="mood-slider">
+                    <div class="mood-label">
+                        <span id="postSessionMoodLabel">Neutral</span>
+                    </div>
+                </div>
+            </main>
+            <footer class="checkin-footer">
+                <button id="finishSessionButton" class="cta-button">Finish</button>
+            </footer>
+        </div>
+
+        <!-- Edit Profile Screen -->
+        <div id="editProfileScreen" class="screen">
+            <div class="screen-header">
+                <button id="backFromProfileBtn" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>Edit Profile</h2>
+                <button id="saveProfileBtn" class="save-button">Save</button>
+            </div>
+            <div class="profile-edit-content">
+                <div class="profile-image-edit">
+                    <div class="profile-image-container">
+                        <div class="profile-image">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <button class="change-photo-btn">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="profile-form">
+                    <div class="form-group">
+                        <label for="profileName">Name</label>
+                        <input type="text" id="profileName" placeholder="Your name" value="Ben">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profileEmail">Email</label>
+                        <input type="email" id="profileEmail" placeholder="Your email" value="ben@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profilePhone">Phone</label>
+                        <input type="tel" id="profilePhone" placeholder="Your phone number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profileBio">Bio</label>
+                        <textarea id="profileBio" placeholder="Tell us a bit about yourself"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Screen -->
+        <div id="settingsScreen" class="screen">
+            <div class="screen-header">
+                <button id="backFromSettingsBtn" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>Settings</h2>
+            </div>
+            <div class="settings-content">
+                <div class="settings-section">
+                    <h3>App Settings</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-item-info">
+                            <i class="fas fa-bell setting-icon"></i>
+                            <div class="setting-text">
+                                <span class="setting-title">Notifications</span>
+                                <span class="setting-description">Manage your notification preferences</span>
+                            </div>
+                        </div>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="notificationToggle" class="toggle-input" checked>
+                            <label for="notificationToggle" class="toggle-label"></label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-item-info">
+                            <i class="fas fa-moon setting-icon"></i>
+                            <div class="setting-text">
+                                <span class="setting-title">Dark Mode</span>
+                                <span class="setting-description">Switch between light and dark theme</span>
+                            </div>
+                        </div>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="darkModeToggle" class="toggle-input">
+                            <label for="darkModeToggle" class="toggle-label"></label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-item-info">
+                            <i class="fas fa-language setting-icon"></i>
+                            <div class="setting-text">
+                                <span class="setting-title">Language</span>
+                                <span class="setting-description">Choose your preferred language</span>
+                            </div>
+                        </div>
+                        <select id="languageSelect" class="setting-select">
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Session Settings</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-item-info">
+                            <i class="fas fa-clock setting-icon"></i>
+                            <div class="setting-text">
+                                <span class="setting-title">Session Duration</span>
+                                <span class="setting-description">Default length for your therapy sessions</span>
+                            </div>
+                        </div>
+                        <select id="sessionDurationSelect" class="setting-select">
+                            <option value="15">15 minutes</option>
+                            <option value="30" selected>30 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60">60 minutes</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-item-info">
+                            <i class="fas fa-volume-up setting-icon"></i>
+                            <div class="setting-text">
+                                <span class="setting-title">Default Volume</span>
+                                <span class="setting-description">Set your preferred AI voice volume</span>
+                            </div>
+                        </div>
+                        <input type="range" id="defaultVolumeSlider" min="0" max="100" value="70" class="settings-slider">
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Privacy & Data</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-item-info">
+                            <i class="fas fa-shield-alt setting-icon"></i>
+                            <div class="setting-text">
+                                <span class="setting-title">Data Storage</span>
+                                <span class="setting-description">How long to keep your session data</span>
+                            </div>
+                        </div>
+                        <select id="dataStorageSelect" class="setting-select">
+                            <option value="30">30 days</option>
+                            <option value="90" selected>90 days</option>
+                            <option value="365">1 year</option>
+                            <option value="0">Forever</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-item-info">
+                            <i class="fas fa-download setting-icon"></i>
+                            <div class="setting-text">
+                                <span class="setting-title">Download My Data</span>
+                                <span class="setting-description">Export all your data and sessions</span>
+                            </div>
+                        </div>
+                        <button id="downloadDataBtn" class="setting-button">Export</button>
+                    </div>
+                    
+                    <div class="setting-item delete-account">
+                        <div class="setting-item-info">
+                            <i class="fas fa-trash-alt setting-icon"></i>
+                            <div class="setting-text">
+                                <span class="setting-title">Delete Account</span>
+                                <span class="setting-description">Permanently remove your account and data</span>
+                            </div>
+                        </div>
+                        <button id="deleteAccountBtn" class="setting-button delete">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include scripts at the end of the body -->
+    <script src="audio-processor.js"></script>
+    <script src="app.js"></script>
+    <script src="script.js"></script>
+    
+    <!-- ElevenLabs Summary Integration -->
+    <script src="summary-service.js"></script>
+    <script src="webhook-handler.js"></script>
+    <script src="summary-ui.js"></script>
+    <script src="summary-integration.js"></script>
+</body>
+</html> 
